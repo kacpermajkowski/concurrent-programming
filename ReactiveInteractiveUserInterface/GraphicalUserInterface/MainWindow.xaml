@@ -11,6 +11,11 @@
     </Window.DataContext>
     <Border BorderThickness="4" BorderBrush="Green" Height="600" Width="800">
         <StackPanel>
+            <TextBlock Text="Ile piłek chcesz dodać?" 
+               Margin="10" 
+               FontWeight="Bold"
+               HorizontalAlignment="Center"
+               Visibility="{Binding InputVisibility}" />
             <TextBox Width="160" Margin="10" VerticalAlignment="Center" HorizontalAlignment="Center"
                      Text="{Binding BallCountText, UpdateSourceTrigger=PropertyChanged}"
                      Visibility="{Binding InputVisibility}" />
