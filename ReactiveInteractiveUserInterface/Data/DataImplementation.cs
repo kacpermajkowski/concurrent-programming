@@ -13,100 +13,87 @@ using System.Diagnostics;
 
 namespace TP.ConcurrentProgramming.Data
 {
-  internal class DataImplementation : DataAbstractAPI
-  {
-    #region ctor
-
-    public DataImplementation()
+    internal class DataImplementation : DataAbstractAPI
     {
-      MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
-    }
-
-    #endregion ctor
-
-    #region DataAbstractAPI
-
-    public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
-    {
-      if (Disposed)
-        throw new ObjectDisposedException(nameof(DataImplementation));
-      if (upperLayerHandler == null)
-        throw new ArgumentNullException(nameof(upperLayerHandler));
-      Random random = new Random();
-      for (int i = 0; i < numberOfBalls; i++)
-      {
-        Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
-        Ball newBall = new(startingPosition, startingPosition);
-        upperLayerHandler(startingPosition, newBall);
-        BallsList.Add(newBall);
-      }
-    }
-
-    #endregion DataAbstractAPI
-
-    #region IDisposable
-
-    protected virtual void Dispose(bool disposing)
-    {
-      if (!Disposed)
-      {
-        if (disposing)
+        #region ctor
+        public DataImplementation()
         {
-          MoveTimer.Dispose();
-          BallsList.Clear();
+            //
         }
-        Disposed = true;
-      }
-      else
-        throw new ObjectDisposedException(nameof(DataImplementation));
+        #endregion ctor
+
+        #region DataAbstractAPI
+        public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(DataImplementation));
+            if (upperLayerHandler == null)
+                throw new ArgumentNullException(nameof(upperLayerHandler));
+
+            for (int i = 0; i < numberOfBalls; i++)
+            {
+                // RandomGenerator to pole w klasie typu Random
+                int randomX = RandomGenerator.Next(100, 400 - 100);
+                int randomY = RandomGenerator.Next(100, 400 - 100);
+
+                Vector startingPosition = new(randomX, randomY);
+                Vector startingVelocity = startingPosition; // dla czytelności
+
+                Ball newBall = new(startingPosition, startingVelocity);
+
+                upperLayerHandler(startingPosition, newBall);
+                BallList.Add(newBall);
+            }
+        }
+        #endregion DataAbstractAPI
+
+        #region IDisposable
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(DataImplementation));
+            if (disposing)
+                BallList.Clear();
+
+            Disposed = true;
+        }
+
+        // Do not change the code below. Put cleanup code in 'Dispose(bool disposing)' method
+        public override void Dispose()
+        {
+
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+        #endregion IDisposable
+
+        #region private
+        private bool Disposed = false;
+
+        private Random RandomGenerator = new();
+        private List<Ball> BallList = [];
+        #endregion private
+
+        #region TestingInfrastructure
+
+        [Conditional("DEBUG")]
+        internal void CheckBallsList(Action<IEnumerable<IBall>> returnBallsList)
+        {
+            returnBallsList(BallList);
+        }
+
+        [Conditional("DEBUG")]
+        internal void CheckNumberOfBalls(Action<int> returnNumberOfBalls)
+        {
+            returnNumberOfBalls(BallList.Count);
+        }
+
+        [Conditional("DEBUG")]
+        internal void CheckObjectDisposed(Action<bool> returnInstanceDisposed)
+        {
+            returnInstanceDisposed(Disposed);
+        }
+
+        #endregion TestingInfrastructure
     }
-
-    public override void Dispose()
-    {
-      // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-      Dispose(disposing: true);
-      GC.SuppressFinalize(this);
-    }
-
-    #endregion IDisposable
-
-    #region private
-
-    //private bool disposedValue;
-    private bool Disposed = false;
-
-    private readonly Timer MoveTimer;
-    private Random RandomGenerator = new();
-    private List<Ball> BallsList = [];
-
-    private void Move(object? x)
-    {
-      foreach (Ball item in BallsList)
-        item.Move(new Vector((RandomGenerator.NextDouble() - 0.5) * 10, (RandomGenerator.NextDouble() - 0.5) * 10));
-    }
-
-    #endregion private
-
-    #region TestingInfrastructure
-
-    [Conditional("DEBUG")]
-    internal void CheckBallsList(Action<IEnumerable<IBall>> returnBallsList)
-    {
-      returnBallsList(BallsList);
-    }
-
-    [Conditional("DEBUG")]
-    internal void CheckNumberOfBalls(Action<int> returnNumberOfBalls)
-    {
-      returnNumberOfBalls(BallsList.Count);
-    }
-
-    [Conditional("DEBUG")]
-    internal void CheckObjectDisposed(Action<bool> returnInstanceDisposed)
-    {
-      returnInstanceDisposed(Disposed);
-    }
-
-    #endregion TestingInfrastructure
-  }
 }

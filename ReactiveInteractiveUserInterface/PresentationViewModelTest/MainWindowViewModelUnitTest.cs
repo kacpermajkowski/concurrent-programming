@@ -32,7 +32,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         Random random = new Random();
         int numberOfBalls = random.Next(1, 10);
         viewModel.Start(numberOfBalls);
-        Assert.IsNotNull(viewModel.Balls);
+        Assert.IsNotNull(viewModel.BallList);
         Assert.AreEqual<int>(0, nullModelFixture.Disposed);
         Assert.AreEqual<int>(numberOfBalls, nullModelFixture.Started);
         Assert.AreEqual<int>(1, nullModelFixture.Subscribed);
@@ -45,15 +45,15 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
     {
       ModelSimulatorFixture modelSimulator = new();
       MainWindowViewModel viewModel = new(modelSimulator);
-      Assert.IsNotNull(viewModel.Balls);
-      Assert.AreEqual<int>(0, viewModel.Balls.Count);
+      Assert.IsNotNull(viewModel.BallList);
+      Assert.AreEqual<int>(0, viewModel.BallList.Count);
       Random random = new Random();
       int numberOfBalls = random.Next(1, 10);
       viewModel.Start(numberOfBalls);
-      Assert.AreEqual<int>(numberOfBalls, viewModel.Balls.Count);
+      Assert.AreEqual<int>(numberOfBalls, viewModel.BallList.Count);
       viewModel.Dispose();
       Assert.IsTrue(modelSimulator.Disposed);
-      Assert.AreEqual<int>(0, viewModel.Balls.Count);
+      Assert.AreEqual<int>(0, viewModel.BallList.Count);
     }
 
     #region testing infrastructure
@@ -80,7 +80,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         Started = numberOfBalls;
       }
 
-      public override IDisposable Subscribe(IObserver<ModelIBall> observer)
+      public override IDisposable SubscribeBallChanged(IObserver<ModelIBall> observer)
       {
         Subscribed++;
         return new NullDisposable();
@@ -111,14 +111,14 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
 
       public ModelSimulatorFixture()
       {
-        eventObservable = Observable.FromEventPattern<BallChaneEventArgs>(this, "BallChanged");
+        eventObservable = Observable.FromEventPattern<BallChangedEventArgs>(this, "BallChanged");
       }
 
       #endregion ctor
 
       #region ModelAbstractApi fixture
 
-      public override IDisposable? Subscribe(IObserver<ModelIBall> observer)
+      public override IDisposable? SubscribeBallChanged(IObserver<ModelIBall> observer)
       {
         return eventObservable?.Subscribe(x => observer.OnNext(x.EventArgs.Ball), ex => observer.OnError(ex), () => observer.OnCompleted());
       }
@@ -128,7 +128,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         for (int i = 0; i < numberOfBalls; i++)
         {
           ModelBall newBall = new ModelBall(0, 0) { };
-          BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
+          BallChanged?.Invoke(this, new BallChangedEventArgs() { Ball = newBall });
         }
       }
 
@@ -141,13 +141,13 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
 
       #region API
 
-      public event EventHandler<BallChaneEventArgs> BallChanged;
+      public event EventHandler<BallChangedEventArgs> BallChanged;
 
       #endregion API
 
       #region private
 
-      private IObservable<EventPattern<BallChaneEventArgs>>? eventObservable = null;
+      private IObservable<EventPattern<BallChangedEventArgs>>? eventObservable = null;
 
       private class ModelBall : ModelIBall
       {
