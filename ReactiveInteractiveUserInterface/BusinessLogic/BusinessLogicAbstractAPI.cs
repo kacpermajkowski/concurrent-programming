@@ -20,17 +20,25 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         #endregion Layer Factory
 
         #region Layer API
+
         public static readonly Dimensions GetDimensions = new(10.0, 10.0, 10.0);
 
         public abstract void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler);
 
+        public abstract void SetBorderSize(int borderSize);
+
         #region IDisposable
+
         public abstract void Dispose();
+
         #endregion IDisposable
+
         #endregion Layer API
 
         #region private
+
         private static Lazy<BusinessLogicAbstractAPI> modelInstance = new Lazy<BusinessLogicAbstractAPI>(() => new BusinessLogicImplementation());
+
         #endregion private
     }
     /// <summary>

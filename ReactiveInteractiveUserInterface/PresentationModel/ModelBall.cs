@@ -9,6 +9,7 @@
 //  by introducing yourself and telling us what you do with this community.
 //_____________________________________________________________________________________________________________________________________
 
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -19,10 +20,16 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 {
     internal class ModelBall : IBall
     {
-        public ModelBall(double top, double left, LogicIBall underneathBall)
+        public ModelBall(
+                        double top, double left, double diameter,
+                        Func<double> scaler,
+                        LogicIBall underneathBall)
         {
-            TopBackingField = top;
-            LeftBackingField = left;
+            _top = top;
+            _left = left;
+            Diameter = diameter; 
+            OriginalDiameter = diameter;
+            this.GetScale = scaler ?? throw new ArgumentNullException(nameof(scaler));
             underneathBall.NewPositionNotification += NewPositionNotification;
         }
 
@@ -30,29 +37,39 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         public double Top
         {
-            get { return TopBackingField; }
+            get { return _top; }
             private set
             {
-                if (TopBackingField == value)
+                if (_top == value)
                     return;
-                TopBackingField = value;
+                _top = value;
                 RaisePropertyChanged();
             }
         }
 
         public double Left
         {
-            get { return LeftBackingField; }
+            get { return _left; }
             private set
             {
-                if (LeftBackingField == value)
+                if (_left == value)
                     return;
-                LeftBackingField = value;
+                _left = value;
                 RaisePropertyChanged();
             }
         }
 
-        public double Diameter { get; init; } = 0;
+        public double Diameter
+        {
+            get { return _diameter; }
+            private set
+            {
+                if (_diameter == value)
+                    return;
+                _diameter = value;
+                RaisePropertyChanged();
+            }
+        }
 
         #region INotifyPropertyChanged
 
@@ -64,13 +81,19 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         #region private
 
-        private double TopBackingField;
-        private double LeftBackingField;
+        private double _top;
+        private double _left;
+        private double _diameter = 20.0;
+        private readonly double OriginalDiameter;
 
         private void NewPositionNotification(object sender, IPosition e)
         {
-            Top = e.y; Left = e.x;
+            Top = e.y * GetScale.Invoke(); 
+            Left = e.x * GetScale.Invoke();
+            Diameter = OriginalDiameter * GetScale.Invoke();
         }
+
+        private readonly Func<double> GetScale;
 
         private void RaisePropertyChanged([CallerMemberName] string propertyName = "")
         {

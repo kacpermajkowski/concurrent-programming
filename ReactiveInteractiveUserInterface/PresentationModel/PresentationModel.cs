@@ -28,6 +28,9 @@ namespace TP.ConcurrentProgramming.Presentation.Model
             layerBelow = underneathLayer == null ? UnderneathLayerAPI.GetBusinessLogicLayer() : underneathLayer;
             ballChangedObservable = Observable.FromEventPattern<BallChangedEventArgs>(this, "BallChanged");
             borderSizeChangedObservable = Observable.FromEventPattern<BorderSizeChangedEventArgs>(this, "BorderSizeChanged");
+            layerBelow.SetBorderSize(_borderSize - 2 * BORDER_THICKNESS);
+            // we only initialize the value above once and then scale everything here if it changes
+            // we have to subtract the border thickness because the balls are drawn inside the border
         }
 
         #region ModelAbstractApi
@@ -58,7 +61,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
         {
 
             this._borderSize = windowHeight > windowWidth ? windowWidth : windowHeight;
-            this._borderSize -= BORDER_SUBTRAHEND;
+            this._borderSize -= WINDOW_BAR_OFFSET;
 
             if(_borderSize < 1)
                 _borderSize = 1;
@@ -84,15 +87,20 @@ namespace TP.ConcurrentProgramming.Presentation.Model
         private readonly IObservable<EventPattern<BorderSizeChangedEventArgs>> borderSizeChangedObservable = null;
 
         private const int BORDER_THICKNESS = 4;
-        private const int WINDOW_BAR_OFFSET = 30;
-        private const int BORDER_SUBTRAHEND = 2 * BORDER_THICKNESS + WINDOW_BAR_OFFSET;
-        private const int DEFAULT_BORDER_SIZE = 600 - BORDER_SUBTRAHEND;
+        private const int WINDOW_BAR_OFFSET = 40;
+        private const int DEFAULT_BORDER_SIZE = 600 - WINDOW_BAR_OFFSET;
+        private const int DEFAULT_BORDER_SIZE_NO_THICKNESS = DEFAULT_BORDER_SIZE - 2 * BORDER_THICKNESS;
         private int _borderSize = DEFAULT_BORDER_SIZE;
 
         private void StartHandler(BusinessLogic.IPosition position, BusinessLogic.IBall ball)
         {
-            ModelBall newBall = new ModelBall(position.x, position.y, ball) { Diameter = 20.0 };
+            ModelBall newBall = new ModelBall(position.x, position.y, 20.0, GetScale, ball);
             BallChanged.Invoke(this, new BallChangedEventArgs() { Ball = newBall });
+        }
+
+        private double GetScale()
+        {
+            return 1.0 * (double) (_borderSize - 2 * BORDER_THICKNESS) / (double) DEFAULT_BORDER_SIZE_NO_THICKNESS;
         }
         #endregion private
 

@@ -24,20 +24,20 @@ namespace TP.ConcurrentProgramming.Data
         public event EventHandler<IVector>? NewPositionNotification;
 
         public IVector Velocity { get; set; }
+        public IVector Position { get; set; }
+
+        public void Move(IVector delta)
+        {
+            Position = new Vector(Position.x + delta.x, Position.y + delta.y);
+            RaiseNewPositionChangeNotification();
+        }
         #endregion IBall
 
         #region private
-        private Vector Position;
 
         private void RaiseNewPositionChangeNotification()
         {
             NewPositionNotification?.Invoke(this, Position);
-        }
-
-        internal void Move(Vector delta)
-        {
-            Position = new Vector(Position.x + delta.x, Position.y + delta.y);
-            RaiseNewPositionChangeNotification();
         }
         #endregion private
     }
