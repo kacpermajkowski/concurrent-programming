@@ -9,6 +9,7 @@
 
 using System;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using TP.ConcurrentProgramming.Presentation.Model;
 using TP.ConcurrentProgramming.Presentation.ViewModel.MVVMLight;
 using ModelIBall = TP.ConcurrentProgramming.Presentation.Model.IBall;
@@ -18,8 +19,13 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     public class MainWindowViewModel : ViewModelBase, IDisposable
     {
         #region ctor
+
+
+
         public MainWindowViewModel() : this(null)
-        { }
+        {
+            StartCommand = new RelayCommand(ExecuteStartCommand);
+        }
 
         internal MainWindowViewModel(ModelAbstractApi modelLayerAPI)
         {
@@ -55,6 +61,15 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
                 }
             }
         }
+        public bool InputVisibility
+        {
+            get => _inputVisibility;
+            set
+            {
+                _inputVisibility = value;
+                RaisePropertyChanged(nameof(InputVisibility));
+            }
+        }
         public int WindowWidth
         {
             get => _windowWidth;
@@ -81,6 +96,22 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
                 }
             }
         }
+
+        public string BallCount
+        {
+            get => _ballCount.ToString();
+            set
+            {
+                int numerical = int.TryParse(value, out int parsed) ? parsed : _ballCount;
+                if (_ballCount != numerical)
+                {
+                    _ballCount = numerical;
+                    RaisePropertyChanged(nameof(BallCount));
+                }
+            }
+        }
+
+        public ICommand StartCommand { get; }
 
         #endregion public API
 
@@ -118,7 +149,17 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
         private int _windowHeight = 600;
         private int _windowWidth = 800;
         private int _borderSize = 1;
+        private int _ballCount = 7;   
+        private bool _inputVisibility = true;
         private bool Disposed = false;
+
+        private void ExecuteStartCommand()
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(MainWindowViewModel));
+            InputVisibility = false;
+            Start(_ballCount);
+        }
         #endregion private
     }
 }
