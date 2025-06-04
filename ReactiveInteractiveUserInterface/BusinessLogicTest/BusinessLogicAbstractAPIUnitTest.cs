@@ -1,34 +1,31 @@
-﻿//____________________________________________________________________________________________________________________________________
-//
-//  Copyright (C) 2024, Mariusz Postol LODZ POLAND.
-//
-//  To be in touch join the community by pressing the `Watch` button and get started commenting using the discussion panel at
-//
-//  https://github.com/mpostol/TP/discussions/182
-//
-//_____________________________________________________________________________________________________________________________________
-
-using TP.ConcurrentProgramming.BusinessLogic;
+﻿using TP.ConcurrentProgramming.BusinessLogic;
 
 namespace TP.ConcurrentProgramming.BusinessLogic.Test
 {
-  [TestClass]
-  public class BusinessLogicAbstractAPIUnitTest
-  {
-    [TestMethod]
-    public void BusinessLogicConstructorTestMethod()
+    [TestClass]
+    public class BusinessLogicAbstractAPIUnitTest
     {
-      BusinessLogicAbstractAPI instance1 = BusinessLogicAbstractAPI.GetBusinessLogicLayer();
-      BusinessLogicAbstractAPI instance2 = BusinessLogicAbstractAPI.GetBusinessLogicLayer();
-      Assert.AreSame(instance1, instance2);
-      instance1.Dispose();
-      Assert.ThrowsException<ObjectDisposedException>(() => instance2.Dispose());
-    }
+        [TestMethod]
+        public void BusinessLogicSingletonTest()
+        {
+            var instance1 = BusinessLogicAbstractAPI.GetBusinessLogicLayer();
+            var instance2 = BusinessLogicAbstractAPI.GetBusinessLogicLayer();
+            Assert.AreSame(instance1, instance2);
+        }
 
-    [TestMethod]
-    public void GetDimensionsTestMethod()
-    {
-      Assert.AreEqual<Dimensions>(new(10.0, 10.0, 10.0), BusinessLogicAbstractAPI.GetDimensions);
+        [TestMethod]
+        public void Dispose_ThrowsOnSecondCall()
+        {
+            var instance = BusinessLogicAbstractAPI.GetBusinessLogicLayer();
+            instance.Dispose();
+            Assert.ThrowsException<ObjectDisposedException>(() => instance.Dispose());
+        }
+
+        [TestMethod]
+        public void GetDimensions_ReturnsExpectedValues()
+        {
+            var expected = new Dimensions(10.0, 10.0, 10.0);
+            Assert.AreEqual(expected, BusinessLogicAbstractAPI.GetDimensions);
+        }
     }
-  }
 }
