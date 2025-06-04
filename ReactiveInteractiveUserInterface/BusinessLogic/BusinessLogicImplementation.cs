@@ -77,11 +77,14 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         {
             DataIBall myBall = layerBellow.GetBall(id);
             DateTime lastUpdate = DateTime.Now;
+            const int targetFrameMs = 16; // ~60 FPS
+
             while (!Disposed)
             {
-                var now = DateTime.Now;
-                double deltaTime = (now - lastUpdate).TotalSeconds;
-                lastUpdate = now;
+                var frameStart = DateTime.Now;
+                double deltaTime = (frameStart - lastUpdate).TotalSeconds;
+                lastUpdate = frameStart;
+
                 CalculateCollisionsForBall(id);
 
                 lock (barrierLock)
@@ -100,7 +103,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
                 layerBellow.MoveBall(id);
 
-                // Logowanie po ruchu
                 var pos = myBall.GetPosition();
                 var vel = myBall.Velocity;
                 logger?.Log($"{DateTime.Now:O},{id},{pos.x},{pos.y},{vel.x},{vel.y}");
@@ -119,7 +121,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                     }
                 }
 
-                Thread.Sleep(16);
+                var frameEnd = DateTime.Now;
+                int elapsedMs = (int)(frameEnd - frameStart).TotalMilliseconds;
+                int sleepMs = targetFrameMs - elapsedMs;
+                if (sleepMs > 0)
+                    Thread.Sleep(sleepMs);
+                // else: pętla wykonała się za wolno, nie śpimy
             }
         }
 
