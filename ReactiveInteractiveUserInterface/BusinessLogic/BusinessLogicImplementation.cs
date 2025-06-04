@@ -3,6 +3,8 @@ using System.Numerics;
 using UnderneathLayerAPI = TP.ConcurrentProgramming.Data.DataAbstractAPI;
 using DataIBall = TP.ConcurrentProgramming.Data.IBall;
 using TP.ConcurrentProgramming.Data;
+using System.IO;
+
 
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
@@ -27,12 +29,14 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             if (Disposed)
                 throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
             layerBellow.Dispose();
+            logger?.Dispose();
             lock (barrierLock)
             {
                 Monitor.PulseAll(barrierLock);
             }
             Disposed = true;
         }
+        private DiagnosticsLogger? logger;
 
         public override void Start(int numberOfBalls, Action<IPosition, IBall, double> upperLayerHandler)
         {
@@ -40,12 +44,16 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
             if (upperLayerHandler == null)
                 throw new ArgumentNullException(nameof(upperLayerHandler));
-            layerBellow.Start(numberOfBalls, (startingPosition, databall, diameter) => upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall), diameter));
+
+            logger = new DiagnosticsLogger("log.txt");
+
+            layerBellow.Start(numberOfBalls, (startingPosition, databall, diameter) => 
+                upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall), diameter));
 
             ballCount = layerBellow.GetBallCount();
             for (int i = 0; i < ballCount; i++)
             {
-                int id = i; // kopiujemy wartość do zmiennej lokalnej dla lambdy
+                int id = i;
                 var thread = new Thread(() => BallThreadLoop(id));
                 thread.IsBackground = true;
                 ballThreads.Add(thread);
@@ -68,8 +76,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private void BallThreadLoop(int id)
         {
             DataIBall myBall = layerBellow.GetBall(id);
+            DateTime lastUpdate = DateTime.Now;
             while (!Disposed)
             {
+                var now = DateTime.Now;
+                double deltaTime = (now - lastUpdate).TotalSeconds;
+                lastUpdate = now;
                 CalculateCollisionsForBall(id);
 
                 lock (barrierLock)
@@ -87,6 +99,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 }
 
                 layerBellow.MoveBall(id);
+
+                // Logowanie po ruchu
+                var pos = myBall.GetPosition();
+                var vel = myBall.Velocity;
+                logger?.Log($"{DateTime.Now:O},{id},{pos.x},{pos.y},{vel.x},{vel.y}");
 
                 lock (barrierLock)
                 {
