@@ -18,7 +18,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     public class MainWindowViewModel : ViewModelBase, IDisposable
     {
         #region ctor
-
         public MainWindowViewModel() : this(null)
         { }
 
@@ -30,44 +29,50 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
 
         #endregion ctor
 
-        private int ballCount = 5;         
-        private string ballCountText = "5";
-
         #region public API
+
+        public bool SettingsVisibility
+        {
+            get => _settingsVisiblity;
+            set
+            {
+                _settingsVisiblity = value;
+                RaisePropertyChanged(nameof(SettingsVisibility));
+            }
+        }
 
         public int BallCount
         {
-            get => ballCount;
+            get => _ballCount;
             set
             {
-                if (value > 0 && value != ballCount)
+                if (value > 0 && value != _ballCount)
                 {
-                    ballCount = value;
-                    ballCountText = value.ToString();
+                    _ballCount = value;
+                    _ballCountText = value.ToString();
                     RaisePropertyChanged(nameof(BallCount));
                     RaisePropertyChanged(nameof(BallCountText));
                 }
             }
         }
-
         public string BallCountText
         {
-            get => ballCountText;
+            get => _ballCountText;
             set
             {
                 if (value == "")
                 {
-                    ballCountText = value;
-                    ballCount = 0;
+                    _ballCountText = value;
+                    _ballCount = 0;
                     RaisePropertyChanged(nameof(BallCountText));
                     RaisePropertyChanged(nameof(BallCount));
                 }
                 if (int.TryParse(value, out int parsed) && parsed > 0)
                 {
-                    if (parsed != ballCount)
+                    if (parsed != _ballCount)
                     {
-                        ballCount = parsed;
-                        ballCountText = value;
+                        _ballCount = parsed;
+                        _ballCountText = value;
                         RaisePropertyChanged(nameof(BallCount));
                         RaisePropertyChanged(nameof(BallCountText));
                     }
@@ -84,6 +89,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
             if (Disposed)
                 throw new ObjectDisposedException(nameof(MainWindowViewModel));
             ModelLayer.Start(numberOfBalls);
+            SettingsVisibility = false;
             Observer.Dispose();
         }
 
@@ -125,6 +131,11 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
         private IDisposable Observer = null;
         private ModelAbstractApi ModelLayer;
         private bool Disposed = false;
+
+        private int _ballCount = 5;
+        private string _ballCountText = "5";
+
+        private bool _settingsVisiblity = true;
 
         #endregion private
     }
