@@ -4,10 +4,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:TP.ConcurrentProgramming.Presentation.ViewModel;assembly=TP.ConcurrentProgramming.PresentationViewModel"
+        xmlns:v="clr-namespace:TP.ConcurrentProgramming.PresentationView"
         mc:Ignorable="d"
         Title="Presentation layer targeting reactive behaviour" Height="688" Width="504">
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <v:BoolToVisibilityConverter x:Key="BoolToVis"/>
     </Window.Resources>
     <Window.DataContext>
         <vm:MainWindowViewModel />
@@ -22,7 +23,8 @@
                  Width="60"/>
         <Button 
             Visibility="{Binding SettingsVisibility, Converter={StaticResource BoolToVis}}"
-            Content="Button" Width="100" Margin="0,10,0,30"/>
+            Command="{Binding StartCommand}"
+            Content="Rozpocznij" Width="100" Margin="0,10,0,30"/>
         <Border BorderThickness="4" BorderBrush="Green" Height="420" Width="400">
             <ItemsControl ItemsSource="{Binding Balls}">
                 <ItemsControl.ItemsPanel>

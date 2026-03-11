@@ -9,6 +9,7 @@
 
 using System;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using TP.ConcurrentProgramming.Presentation.Model;
 using TP.ConcurrentProgramming.Presentation.ViewModel.MVVMLight;
 using ModelIBall = TP.ConcurrentProgramming.Presentation.Model.IBall;
@@ -25,11 +26,14 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
         {
             ModelLayer = modelLayerAPI == null ? ModelAbstractApi.CreateModel() : modelLayerAPI;
             Observer = ModelLayer.Subscribe<ModelIBall>(x => Balls.Add(x));
+            StartCommand = new RelayCommand(ExecuteStart, CanExecuteStart);
         }
 
         #endregion ctor
 
         #region public API
+
+        public ICommand StartCommand { get;  }
 
         public bool SettingsVisibility
         {
@@ -84,15 +88,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
             }
         }
 
-        public void Start(int numberOfBalls)
-        {
-            if (Disposed)
-                throw new ObjectDisposedException(nameof(MainWindowViewModel));
-            ModelLayer.Start(numberOfBalls);
-            SettingsVisibility = false;
-            Observer.Dispose();
-        }
-
         public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
 
         #endregion public API
@@ -132,10 +127,31 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
         private ModelAbstractApi ModelLayer;
         private bool Disposed = false;
 
+        private bool _settingsVisiblity = true;
+
         private int _ballCount = 5;
         private string _ballCountText = "5";
 
-        private bool _settingsVisiblity = true;
+        private void ExecuteStart()
+        {
+            Start(_ballCount);
+        }
+
+        private bool CanExecuteStart()
+        {
+            return _ballCount > 0;
+        }
+
+        private void Start(int numberOfBalls)
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(MainWindowViewModel));
+
+            SettingsVisibility = false;
+            ModelLayer.Start(numberOfBalls);
+
+            Observer.Dispose();
+        }
 
         #endregion private
     }
