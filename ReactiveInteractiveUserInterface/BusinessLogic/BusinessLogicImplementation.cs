@@ -36,7 +36,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       if (Disposed)
         throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
 
-      MoveTimer.Dispose();
+      if(MoveTimer != null)
+        MoveTimer.Dispose();
+
       dataLayer.Dispose();
 
       foreach (Ball ball in BallsList)
