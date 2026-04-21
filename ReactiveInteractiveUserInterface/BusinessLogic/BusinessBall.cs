@@ -38,6 +38,29 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       _dataBall.Move(new Vector(xDelta, yDelta));
     }
 
+    public Vector Velocity
+    {
+      get
+      {
+        return new Vector(_dataBall.Velocity.x, _dataBall.Velocity.y);
+      }
+      set
+      {
+        _dataBall.Velocity = new Vector(value.x, value.y);
+      }
+    }
+
+    public Position Position
+    {
+      get
+      {
+        return new Position(_dataBall.Position.x, _dataBall.Position.y);
+      }
+    }
+
+    public double Diameter => _dataBall.Diameter;
+
+
     #endregion IBall
 
     #region private

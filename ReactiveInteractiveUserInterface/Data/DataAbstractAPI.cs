@@ -25,6 +25,9 @@ namespace TP.ConcurrentProgramming.Data
 
     public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
 
+    public abstract double BoardWidth { get; }
+    public abstract double BoardHeight { get; }
+
     #endregion public API
 
     #region IDisposable
@@ -51,6 +54,10 @@ namespace TP.ConcurrentProgramming.Data
     event EventHandler<IVector> NewPositionNotification;
 
     IVector Velocity { get; set; }
+    IVector Position { get; }
+
+    double Diameter { get; }
+
     void Move(IVector delta);
   }
 }

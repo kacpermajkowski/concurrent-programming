@@ -10,6 +10,7 @@
 
 using System.Diagnostics;
 using TP.ConcurrentProgramming.Data;
+using static TP.ConcurrentProgramming.BusinessLogic.Ball;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
@@ -24,7 +25,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     internal BusinessLogicImplementation(DataAbstractAPI? dataLayer)
     {
       this.dataLayer = dataLayer == null ? DataAbstractAPI.GetDataLayer() : dataLayer;
-      MoveTimer = new Timer(tickSimulation, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
     }
 
     #endregion ctor
@@ -63,6 +63,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         BallsList.Add(logicBall);
         ballCreatedHandler(new Position(startingPosition.x, startingPosition.y), logicBall);
       });
+
+      MoveTimer = new Timer(tickSimulation, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
     }
 
     #endregion BusinessLogicAbstractAPI
@@ -74,16 +76,31 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     private readonly DataAbstractAPI dataLayer;
     private List<Ball> BallsList = new List<Ball>();
 
-    private readonly Timer MoveTimer;
+    private Timer MoveTimer;
     private Random RandomGenerator = new();
 
     private void tickSimulation(object? x)
     {
       foreach (Ball item in BallsList)
-        item.Move(
+      {
+        double deltaX = item.Velocity.x;
+        double deltaY = item.Velocity.y;
+
+        if (item.Position.x + deltaX < 0 || item.Position.x + item.Diameter + deltaX > dataLayer.BoardWidth)
+          deltaX = -deltaX;
+        if (item.Position.y + deltaY < 0 || item.Position.y + item.Diameter + deltaY > dataLayer.BoardHeight)
+          deltaY = -deltaY;
+
+        item.Move(deltaX, deltaY);
+
+        item.Velocity = new Vector(
           (RandomGenerator.NextDouble() - 0.5) * 10,
           (RandomGenerator.NextDouble() - 0.5) * 10
-          );
+        );
+      }
+
+
+
     }
 
     #endregion private

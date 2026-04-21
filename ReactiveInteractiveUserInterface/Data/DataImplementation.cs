@@ -35,14 +35,29 @@ namespace TP.ConcurrentProgramming.Data
       Random random = new Random();
       for (int i = 0; i < numberOfBalls; i++)
       {
-        Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
+        double diameter = 20.0;
 
-        Ball newBall = new(startingPosition, startingPosition);
+        Vector startingPosition = new(
+          random.NextDouble() * (_boardWidth - diameter),
+          random.NextDouble() * (_boardHeight - diameter)
+        );
+
+        Ball newBall = new(startingPosition, startingPosition, diameter);
         ballCreatedHandler(startingPosition, newBall);
 
         BallsList.Add(newBall);
       }
     }
+
+    public override double BoardWidth {
+      get => _boardWidth;
+    }
+
+    public override double BoardHeight
+    {
+      get => _boardHeight;
+    }
+
 
     #endregion DataAbstractAPI
 
@@ -76,6 +91,10 @@ namespace TP.ConcurrentProgramming.Data
     private bool Disposed = false;
 
     private List<Ball> BallsList = [];
+
+    // wartości abstrakcyjne używane jako punkt odniesienia, wybór jest arbitralny i
+    // w efekcie końcowym odpowiada jedynie za proporcje stołu bilardowego
+    private double _boardWidth = 400.0, _boardHeight = 420.0;
 
     #endregion private
 
