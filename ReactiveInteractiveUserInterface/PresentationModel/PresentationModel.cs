@@ -11,7 +11,8 @@ using System;
 using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
-using UnderneathLayerAPI = TP.ConcurrentProgramming.BusinessLogic.BusinessLogicAbstractAPI;
+using System.Reactive.Subjects;
+using TP.ConcurrentProgramming.BusinessLogic;
 
 namespace TP.ConcurrentProgramming.Presentation.Model
 {
@@ -23,10 +24,9 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     internal ModelImplementation() : this(null)
     { }
 
-    internal ModelImplementation(UnderneathLayerAPI underneathLayer)
+    internal ModelImplementation(BusinessLogicAbstractAPI logicLayer)
     {
-      layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetBusinessLogicLayer() : underneathLayer;
-      eventObservable = Observable.FromEventPattern<BallChaneEventArgs>(this, "BallChanged");
+      this.businessLogic = logicLayer == null ? BusinessLogicAbstractAPI.GetBusinessLogicLayer() : logicLayer;
     }
 
     #region ModelAbstractApi
@@ -35,38 +35,40 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     {
       if (Disposed)
         throw new ObjectDisposedException(nameof(Model));
-      layerBellow.Dispose();
+      businessLogic.Dispose();
+      ballCreatedSubject.Dispose();
       Disposed = true;
     }
 
     public override IDisposable Subscribe(IObserver<IBall> observer)
     {
-      return eventObservable.Subscribe(x => observer.OnNext(x.EventArgs.Ball), ex => observer.OnError(ex), () => observer.OnCompleted());
+      return ballCreatedSubject.Subscribe(observer);
     }
 
     public override void Start(int numberOfBalls)
     {
-      layerBellow.Start(numberOfBalls, StartHandler);
+      businessLogic.Start(numberOfBalls, BallCreatedHandler);
     }
 
     #endregion ModelAbstractApi
 
     #region API
 
-    public event EventHandler<BallChaneEventArgs> BallChanged;
 
     #endregion API
 
     #region private
 
     private bool Disposed = false;
-    private readonly IObservable<EventPattern<BallChaneEventArgs>> eventObservable = null;
-    private readonly UnderneathLayerAPI layerBellow = null;
 
-    private void StartHandler(BusinessLogic.IPosition position, BusinessLogic.IBall ball)
+    private readonly Subject<IBall> ballCreatedSubject = new Subject<IBall>();
+
+    private readonly BusinessLogicAbstractAPI businessLogic = null;
+
+    private void BallCreatedHandler(BusinessLogic.IPosition position, BusinessLogic.IBall ball)
     {
       ModelBall newBall = new ModelBall(position.x, position.y, ball) { Diameter = 20.0 };
-      BallChanged.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
+      ballCreatedSubject.OnNext(newBall);
     }
 
     #endregion private
@@ -80,22 +82,17 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     }
 
     [Conditional("DEBUG")]
-    internal void CheckUnderneathLayerAPI(Action<UnderneathLayerAPI> returnNumberOfBalls)
+    internal void CheckUnderneathLayerAPI(Action<BusinessLogicAbstractAPI> returnNumberOfBalls)
     {
-      returnNumberOfBalls(layerBellow);
+      returnNumberOfBalls(businessLogic);
     }
 
     [Conditional("DEBUG")]
-    internal void CheckBallChangedEvent(Action<bool> returnBallChangedIsNull)
+    internal void CheckBallChangedSubject(Action<bool> returnBallChangedIsNull)
     {
-      returnBallChangedIsNull(BallChanged == null);
+      returnBallChangedIsNull(ballCreatedSubject == null);
     }
 
     #endregion TestingInfrastructure
-  }
-
-  public class BallChaneEventArgs : EventArgs
-  {
-    public IBall Ball { get; init; }
   }
 }

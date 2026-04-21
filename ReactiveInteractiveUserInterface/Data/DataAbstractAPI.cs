@@ -42,14 +42,7 @@ namespace TP.ConcurrentProgramming.Data
 
   public interface IVector
   {
-    /// <summary>
-    /// The X component of the vector.
-    /// </summary>
     double x { get; init; }
-
-    /// <summary>
-    /// The y component of the vector.
-    /// </summary>
     double y { get; init; }
   }
 
@@ -58,5 +51,6 @@ namespace TP.ConcurrentProgramming.Data
     event EventHandler<IVector> NewPositionNotification;
 
     IVector Velocity { get; set; }
+    void Move(IVector delta);
   }
 }

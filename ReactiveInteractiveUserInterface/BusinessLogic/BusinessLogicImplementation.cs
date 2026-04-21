@@ -9,7 +9,7 @@
 //_____________________________________________________________________________________________________________________________________
 
 using System.Diagnostics;
-using UnderneathLayerAPI = TP.ConcurrentProgramming.Data.DataAbstractAPI;
+using TP.ConcurrentProgramming.Data;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
@@ -18,11 +18,13 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     #region ctor
 
     public BusinessLogicImplementation() : this(null)
-    { }
-
-    internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
     {
-      layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
+    }
+
+    internal BusinessLogicImplementation(DataAbstractAPI? dataLayer)
+    {
+      this.dataLayer = dataLayer == null ? DataAbstractAPI.GetDataLayer() : dataLayer;
+      MoveTimer = new Timer(tickSimulation, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
     }
 
     #endregion ctor
@@ -33,17 +35,34 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     {
       if (Disposed)
         throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
-      layerBellow.Dispose();
+
+      MoveTimer.Dispose();
+      dataLayer.Dispose();
+
+      foreach (Ball ball in BallsList)
+      {
+          ball.Dispose();
+      }
+      BallsList.Clear();
+
       Disposed = true;
     }
 
-    public override void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler)
+    public override void Start(int numberOfBalls, Action<IPosition, IBall> ballCreatedHandler)
     {
       if (Disposed)
         throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
-      if (upperLayerHandler == null)
-        throw new ArgumentNullException(nameof(upperLayerHandler));
-      layerBellow.Start(numberOfBalls, (startingPosition, databall) => upperLayerHandler(new Position(startingPosition.x, startingPosition.x), new Ball(databall)));
+      if (ballCreatedHandler == null)
+        throw new ArgumentNullException(nameof(ballCreatedHandler));
+
+      BallsList.Clear();
+
+      dataLayer.Start(numberOfBalls, (startingPosition, databall) => 
+      {
+        Ball logicBall = new Ball(databall);
+        BallsList.Add(logicBall);
+        ballCreatedHandler(new Position(startingPosition.x, startingPosition.y), logicBall);
+      });
     }
 
     #endregion BusinessLogicAbstractAPI
@@ -52,7 +71,20 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     private bool Disposed = false;
 
-    private readonly UnderneathLayerAPI layerBellow;
+    private readonly DataAbstractAPI dataLayer;
+    private List<Ball> BallsList = new List<Ball>();
+
+    private readonly Timer MoveTimer;
+    private Random RandomGenerator = new();
+
+    private void tickSimulation(object? x)
+    {
+      foreach (Ball item in BallsList)
+        item.Move(
+          (RandomGenerator.NextDouble() - 0.5) * 10,
+          (RandomGenerator.NextDouble() - 0.5) * 10
+          );
+    }
 
     #endregion private
 

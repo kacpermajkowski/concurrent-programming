@@ -49,7 +49,8 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
       Assert.AreEqual<int>(0, viewModel.Balls.Count);
       Random random = new Random();
       int numberOfBalls = random.Next(1, 10);
-      viewModel.Start(numberOfBalls);
+      viewModel.BallCount = numberOfBalls;
+      viewModel.StartCommand.Execute(null);
       Assert.AreEqual<int>(numberOfBalls, viewModel.Balls.Count);
       viewModel.Dispose();
       Assert.IsTrue(modelSimulator.Disposed);
@@ -111,7 +112,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
 
       public ModelSimulatorFixture()
       {
-        eventObservable = Observable.FromEventPattern<BallChaneEventArgs>(this, "BallChanged");
+        eventObservable = Observable.FromEventPattern<BallCreatedEventArgs>(this, "BallChanged");
       }
 
       #endregion ctor
@@ -128,7 +129,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         for (int i = 0; i < numberOfBalls; i++)
         {
           ModelBall newBall = new ModelBall(0, 0) { };
-          BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
+          BallChanged?.Invoke(this, new BallCreatedEventArgs() { Ball = newBall });
         }
       }
 
@@ -141,13 +142,13 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
 
       #region API
 
-      public event EventHandler<BallChaneEventArgs> BallChanged;
+      public event EventHandler<BallCreatedEventArgs> BallChanged;
 
       #endregion API
 
       #region private
 
-      private IObservable<EventPattern<BallChaneEventArgs>>? eventObservable = null;
+      private IObservable<EventPattern<BallCreatedEventArgs>>? eventObservable = null;
 
       private class ModelBall : ModelIBall
       {

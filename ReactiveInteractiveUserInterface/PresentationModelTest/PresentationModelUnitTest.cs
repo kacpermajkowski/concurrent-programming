@@ -24,7 +24,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
       {
         newInstance.CheckObjectDisposed(x => Assert.IsFalse(x));
         newInstance.CheckUnderneathLayerAPI(x => Assert.AreSame(underneathLayerFixture, x));
-        newInstance.CheckBallChangedEvent(x => Assert.IsTrue(x));
+        newInstance.CheckBallChangedSubject(x => Assert.IsTrue(x));
         Assert.IsFalse(underneathLayerFixture.Disposed);
       }
       newInstance.CheckObjectDisposed(x => Assert.IsTrue(x));
@@ -39,13 +39,13 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
       UnderneathLayerFixture underneathLayerFixture = new UnderneathLayerFixture();
       using (ModelImplementation newInstance = new(underneathLayerFixture))
       {
-        newInstance.CheckBallChangedEvent(x => Assert.IsTrue(x));
+        newInstance.CheckBallChangedSubject(x => Assert.IsTrue(x));
         IDisposable subscription = newInstance.Subscribe(x => { });
-        newInstance.CheckBallChangedEvent(x => Assert.IsFalse(x));
+        newInstance.CheckBallChangedSubject(x => Assert.IsFalse(x));
         newInstance.Start(10);
         Assert.AreEqual<int>(10, underneathLayerFixture.NumberOfBalls);
         subscription.Dispose();
-        newInstance.CheckBallChangedEvent(x => Assert.IsTrue(x));
+        newInstance.CheckBallChangedSubject(x => Assert.IsTrue(x));
       }
     }
 
