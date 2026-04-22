@@ -21,8 +21,6 @@ namespace TP.ConcurrentProgramming.PresentationView
     public MainWindow()
     {
       InitializeComponent();
-      double screenWidth = SystemParameters.PrimaryScreenWidth;
-      double screenHeight = SystemParameters.PrimaryScreenHeight;
     }
 
     /// <summary>

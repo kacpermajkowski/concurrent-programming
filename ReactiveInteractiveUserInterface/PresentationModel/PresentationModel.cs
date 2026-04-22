@@ -55,15 +55,19 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     {
       businessLogic.Start(numberOfBalls, BallCreatedHandler);
     }
-    public override void SetScale(double scale)
+    public override void SetWindowDimensions(double height, double width)
     {
-      if (_scale != scale)
-      {
-        _scale = scale;
-        NewScaleNotification?.Invoke(this, scale);
-      }
+      _windowHeight = height;
+      _windowWidth = width;
+      UpdateScale();
     }
 
+    public override void SetDefaultWindowDimensions(double DEFAULT_WINDOW_HEIGHT, double DEFAULT_WINDOW_WIDTH)
+    {
+      _defaultWindowHeight = DEFAULT_WINDOW_HEIGHT;
+      _defaultWindowWidth = DEFAULT_WINDOW_WIDTH;
+      UpdateScale();
+    }
 
     #endregion ModelAbstractApi
 
@@ -74,9 +78,21 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     #region private
 
+    private void UpdateScale()
+    {
+      double tempScale1 = _windowHeight / _defaultWindowHeight;
+      double tempScale2 = _windowWidth / _defaultWindowWidth;
+      double tempScale = Math.Min(tempScale2, tempScale1);
+
+      _scale = tempScale;
+      NewScaleNotification?.Invoke(this, _scale);
+    }
+
     private bool Disposed = false;
 
     private double _scale = 1.0;
+
+    private double _windowHeight, _windowWidth, _defaultWindowHeight, _defaultWindowWidth;
 
     private readonly Subject<IBall> ballCreatedSubject = new Subject<IBall>();
 

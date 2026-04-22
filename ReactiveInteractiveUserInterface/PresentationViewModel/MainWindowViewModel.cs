@@ -27,6 +27,10 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     internal MainWindowViewModel(ModelAbstractApi modelLayerAPI)
     {
       ModelLayer = modelLayerAPI == null ? ModelAbstractApi.CreateModel() : modelLayerAPI;
+
+      ModelLayer.SetDefaultWindowDimensions(DEFAULT_WINDOW_HEIGHT, DEFAULT_WINDOW_WIDTH);
+      ModelLayer.NewScaleNotification += NewScaleNotification;
+
       Observer = ModelLayer.Subscribe<ModelIBall>(x => Balls.Add(x));
       StartCommand = new RelayCommand(ExecuteStart, CanExecuteStart);
     }
@@ -95,7 +99,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
       set
       {
         _windowHeight = value;
-        UpdateScale();
+        ModelLayer.SetWindowDimensions(_windowHeight, _windowWidth);
       }
     }
 
@@ -104,7 +108,25 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
       set
       {
         _windowWidth = value;
-        UpdateScale();
+        ModelLayer.SetWindowDimensions(_windowHeight, _windowWidth);
+      }
+    }
+
+    public double TableHeight
+    {
+      get => _tableHeight * _scale;
+      set
+      {
+        _tableHeight = value;
+      }
+    }
+
+    public double TableWidth
+    {
+      get => _tableWidth * _scale;
+      set
+      {
+        _tableWidth = value;
       }
     }
 
@@ -145,13 +167,27 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
 
     #region private
 
-    private double _scale;
+    private double _scale = 1.0;
 
-    private const double DEFAULT_HEIGHT = 700;
-    private const double DEFAULT_WIDTH = 600;
+    private void NewScaleNotification(object sender, double newScale)
+    {
+      _scale = newScale;
+      RaisePropertyChanged(nameof(Scale));
+      RaisePropertyChanged(nameof(TableHeight));
+      RaisePropertyChanged(nameof(TableWidth));
+    }
 
-    private double _windowHeight = DEFAULT_HEIGHT;
-    private double _windowWidth = DEFAULT_WIDTH;
+    private const double DEFAULT_WINDOW_HEIGHT = 650;
+    private const double DEFAULT_WINDOW_WIDTH = 450;
+
+    private double _windowHeight = DEFAULT_WINDOW_HEIGHT;
+    private double _windowWidth = DEFAULT_WINDOW_WIDTH;
+
+    private const double DEFAULT_TABLE_HEIGHT = 420;
+    private const double DEFAULT_TABLE_WIDTH = 400;
+
+    private double _tableHeight = DEFAULT_TABLE_HEIGHT;
+    private double _tableWidth = DEFAULT_TABLE_WIDTH;
 
     private bool Disposed = false;
 
@@ -162,19 +198,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
 
     private int _ballCount = 5;
     private string _ballCountText = "5";
-
-    private void UpdateScale()
-    {
-      double tempScale1 = WindowHeight / DEFAULT_HEIGHT;
-      double tempScale2 = WindowWidth / DEFAULT_WIDTH;
-      double tempScale = Math.Min(tempScale2, tempScale1);
-
-      if (tempScale != _scale)
-      {
-        _scale = tempScale;
-        ModelLayer.SetScale(_scale);
-      }
-    }
 
     private void ExecuteStart()
     {

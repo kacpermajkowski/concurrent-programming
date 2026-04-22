@@ -33,7 +33,9 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     public abstract Dimensions Dimensions { get; }
 
-    public abstract void SetScale(double scale);
+    public abstract void SetWindowDimensions(double height, double width);
+
+    public abstract void SetDefaultWindowDimensions(double DEFAULT_WINDOW_HEIGHT, double DEFAULT_WINDOW_WIDTH);
 
     #region IObservable
 
