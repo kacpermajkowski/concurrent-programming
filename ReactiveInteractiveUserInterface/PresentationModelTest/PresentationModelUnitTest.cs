@@ -9,6 +9,7 @@
 //_____________________________________________________________________________________________________________________________________
 
 using TP.ConcurrentProgramming.BusinessLogic;
+using BLDimensions = TP.ConcurrentProgramming.BusinessLogic.Dimensions;
 
 namespace TP.ConcurrentProgramming.Presentation.Model.Test
 {
@@ -24,7 +25,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
       {
         newInstance.CheckObjectDisposed(x => Assert.IsFalse(x));
         newInstance.CheckUnderneathLayerAPI(x => Assert.AreSame(underneathLayerFixture, x));
-        newInstance.CheckBallChangedSubject(x => Assert.IsTrue(x));
+        newInstance.CheckBallChangedSubject(x => Assert.IsFalse(x));
         Assert.IsFalse(underneathLayerFixture.Disposed);
       }
       newInstance.CheckObjectDisposed(x => Assert.IsTrue(x));
@@ -39,13 +40,13 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
       UnderneathLayerFixture underneathLayerFixture = new UnderneathLayerFixture();
       using (ModelImplementation newInstance = new(underneathLayerFixture))
       {
-        newInstance.CheckBallChangedSubject(x => Assert.IsTrue(x));
+        newInstance.CheckBallChangedSubject(x => Assert.IsFalse(x));
         IDisposable subscription = newInstance.Subscribe(x => { });
         newInstance.CheckBallChangedSubject(x => Assert.IsFalse(x));
         newInstance.Start(10);
         Assert.AreEqual<int>(10, underneathLayerFixture.NumberOfBalls);
         subscription.Dispose();
-        newInstance.CheckBallChangedSubject(x => Assert.IsTrue(x));
+        newInstance.CheckBallChangedSubject(x => Assert.IsFalse(x));
       }
     }
 
@@ -61,6 +62,8 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
       #endregion testing instrumentation
 
       #region BusinessLogicAbstractAPI
+
+      public override BLDimensions Dimensions => new(100.0, 100.0);
 
       public override void Dispose()
       {

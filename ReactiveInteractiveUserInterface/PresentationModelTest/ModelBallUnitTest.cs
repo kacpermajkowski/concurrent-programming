@@ -18,7 +18,8 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
     [TestMethod]
     public void ConstructorTestMethod()
     {
-      ModelBall ball = new ModelBall(0.0, 0.0, new BusinessLogicIBallFixture());
+      using ModelImplementation model = new(new UnderneathLayerFixture());
+      ModelBall ball = new ModelBall(0.0, 0.0, 10.0, new BusinessLogicIBallFixture(), model);
       Assert.AreEqual<double>(0.0, ball.Top);
       Assert.AreEqual<double>(0.0, ball.Top);
     }
@@ -27,7 +28,8 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
     public void PositionChangeNotificationTestMethod()
     {
       int notificationCounter = 0;
-      ModelBall ball = new ModelBall(0, 0.0, new BusinessLogicIBallFixture());
+      using ModelImplementation model = new(new UnderneathLayerFixture());
+      ModelBall ball = new ModelBall(0.0, 0.0, 10.0, new BusinessLogicIBallFixture(), model);
       ball.PropertyChanged += (sender, args) => notificationCounter++;
       Assert.AreEqual(0, notificationCounter);
       ball.SetLeft(1.0);
@@ -46,9 +48,24 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
     {
       public event EventHandler<IPosition>? NewPositionNotification;
 
-      public void Dispose()
+      internal void RaiseNewPosition(double x, double y)
       {
-        throw new NotImplementedException();
+        NewPositionNotification?.Invoke(this, new PositionFixture(x, y));
+      }
+
+      private record PositionFixture(double x, double y) : IPosition;
+
+    }
+
+    private class UnderneathLayerFixture : BusinessLogicAbstractAPI
+    {
+      public override TP.ConcurrentProgramming.BusinessLogic.Dimensions Dimensions => new(100.0, 100.0);
+
+      public override void Start(int numberOfBalls, Action<IPosition, BusinessLogic.IBall> upperLayerHandler)
+      { }
+
+      public override void Dispose()
+      {
       }
     }
 

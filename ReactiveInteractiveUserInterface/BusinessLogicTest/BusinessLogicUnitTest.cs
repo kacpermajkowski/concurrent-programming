@@ -64,6 +64,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
 
     private class DataLayerConstructorFixcure : Data.DataAbstractAPI
     {
+      public override double BoardWidth => 100.0;
+
+      public override double BoardHeight => 100.0;
+
       public override void Dispose()
       { }
 
@@ -76,6 +80,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     private class DataLayerDisposeFixcure : Data.DataAbstractAPI
     {
       internal bool Disposed = false;
+
+      public override double BoardWidth => 100.0;
+
+      public override double BoardHeight => 100.0;
 
       public override void Dispose()
       {
@@ -92,6 +100,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     {
       internal bool StartCalled = false;
       internal int NumberOfBallseCreated = -1;
+
+      public override double BoardWidth => 100.0;
+
+      public override double BoardHeight => 100.0;
 
       public override void Dispose()
       { }
@@ -113,7 +125,14 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       {
         public IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
+        public IVector Position => new DataVectorFixture();
+
+        public double Diameter => 10.0;
+
         public event EventHandler<IVector>? NewPositionNotification = null;
+
+        public void Move(IVector delta)
+        { }
       }
     }
 

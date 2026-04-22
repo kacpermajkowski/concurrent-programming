@@ -10,8 +10,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.ComponentModel;
-using System.Reactive;
-using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using TP.ConcurrentProgramming.Presentation.Model;
 using ModelIBall = TP.ConcurrentProgramming.Presentation.Model.IBall;
 
@@ -31,7 +30,8 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
       {
         Random random = new Random();
         int numberOfBalls = random.Next(1, 10);
-        viewModel.Start(numberOfBalls);
+        viewModel.BallCount = numberOfBalls;
+        viewModel.StartCommand.Execute(null);
         Assert.IsNotNull(viewModel.Balls);
         Assert.AreEqual<int>(0, nullModelFixture.Disposed);
         Assert.AreEqual<int>(numberOfBalls, nullModelFixture.Started);
@@ -71,6 +71,10 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
 
       #region ModelAbstractApi
 
+      public override event EventHandler<double> NewScaleNotification;
+
+      public override Dimensions Dimensions => new(100.0, 100.0);
+
       public override void Dispose()
       {
         Disposed++;
@@ -80,6 +84,12 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
       {
         Started = numberOfBalls;
       }
+
+      public override void SetWindowDimensions(double height, double width)
+      { }
+
+      public override void SetDefaultWindowDimensions(double DEFAULT_WINDOW_HEIGHT, double DEFAULT_WINDOW_WIDTH)
+      { }
 
       public override IDisposable Subscribe(IObserver<ModelIBall> observer)
       {
@@ -108,20 +118,15 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
 
       #endregion Testing indicators
 
-      #region ctor
-
-      public ModelSimulatorFixture()
-      {
-        eventObservable = Observable.FromEventPattern<BallCreatedEventArgs>(this, "BallChanged");
-      }
-
-      #endregion ctor
-
       #region ModelAbstractApi fixture
+
+      public override event EventHandler<double> NewScaleNotification;
+
+      public override Dimensions Dimensions => new(100.0, 100.0);
 
       public override IDisposable? Subscribe(IObserver<ModelIBall> observer)
       {
-        return eventObservable?.Subscribe(x => observer.OnNext(x.EventArgs.Ball), ex => observer.OnError(ex), () => observer.OnCompleted());
+        return modelBallSubject.Subscribe(observer);
       }
 
       public override void Start(int numberOfBalls)
@@ -129,9 +134,15 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         for (int i = 0; i < numberOfBalls; i++)
         {
           ModelBall newBall = new ModelBall(0, 0) { };
-          BallChanged?.Invoke(this, new BallCreatedEventArgs() { Ball = newBall });
+          modelBallSubject.OnNext(newBall);
         }
       }
+
+      public override void SetWindowDimensions(double height, double width)
+      { }
+
+      public override void SetDefaultWindowDimensions(double DEFAULT_WINDOW_HEIGHT, double DEFAULT_WINDOW_WIDTH)
+      { }
 
       public override void Dispose()
       {
@@ -140,32 +151,29 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
 
       #endregion ModelAbstractApi
 
-      #region API
-
-      public event EventHandler<BallCreatedEventArgs> BallChanged;
-
-      #endregion API
-
       #region private
 
-      private IObservable<EventPattern<BallCreatedEventArgs>>? eventObservable = null;
+      private readonly Subject<ModelIBall> modelBallSubject = new();
 
       private class ModelBall : ModelIBall
       {
         public ModelBall(double top, double left)
-        { }
+        {
+          Top = top;
+          Left = left;
+        }
 
         #region IBall
 
-        public double Diameter => throw new NotImplementedException();
+        public double Diameter => 10.0;
 
-        public double Top => throw new NotImplementedException();
+        public double Top { get; }
 
-        public double Left => throw new NotImplementedException();
+        public double Left { get; }
 
         #region INotifyPropertyChanged
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged = null;
 
         #endregion INotifyPropertyChanged
 
