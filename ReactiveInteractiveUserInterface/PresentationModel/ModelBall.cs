@@ -11,6 +11,7 @@
 
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
 using TP.ConcurrentProgramming.BusinessLogic;
 using LogicIBall = TP.ConcurrentProgramming.BusinessLogic.IBall;
@@ -19,40 +20,45 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 {
   internal class ModelBall : IBall
   {
-    public ModelBall(double top, double left, LogicIBall underneathBall)
+    public ModelBall(double top, double left, double diameter, LogicIBall logicBall, ModelImplementation modelLayer)
     {
-      TopBackingField = top;
-      LeftBackingField = left;
-      underneathBall.NewPositionNotification += NewPositionNotification;
+      _top = top;
+      _left = left;
+      _diameter = diameter;
+
+      logicBall.NewPositionNotification += NewPositionNotification;
+      modelLayer.NewScaleNotification += NewScaleNotification;
     }
 
     #region IBall
 
     public double Top
     {
-      get { return TopBackingField; }
+      get { return _top * _scale; }
       private set
       {
-        if (TopBackingField == value)
+        if (_top == value)
           return;
-        TopBackingField = value;
+        _top = value;
         RaisePropertyChanged();
       }
     }
 
     public double Left
     {
-      get { return LeftBackingField; }
+      get { return _left * _scale; }
       private set
       {
-        if (LeftBackingField == value)
+        if (_left == value)
           return;
-        LeftBackingField = value;
+        _left = value;
         RaisePropertyChanged();
       }
     }
 
-    public double Diameter { get; init; } = 0;
+    public double Diameter {
+      get => _diameter * _scale;
+    }
 
     #region INotifyPropertyChanged
 
@@ -64,12 +70,20 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     #region private
 
-    private double TopBackingField;
-    private double LeftBackingField;
+    private double _top, _left, _diameter;
 
-    private void NewPositionNotification(object sender, IPosition e)
+    private double _scale = 1.0;
+
+    private void NewPositionNotification(object sender, IPosition newPos)
     {
-      Top = e.y; Left = e.x;
+      Top = newPos.y; 
+      Left = newPos.x; 
+    }
+
+    private void NewScaleNotification(object sender, double scale)
+    {
+      _scale = scale;
+      RaisePropertyChanged(nameof(Diameter));
     }
 
     private void RaisePropertyChanged([CallerMemberName] string propertyName = "")

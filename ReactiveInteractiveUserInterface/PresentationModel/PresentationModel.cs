@@ -35,7 +35,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       get => new Dimensions(businessLogic.Dimensions.TableHeight, businessLogic.Dimensions.TableWidth);
     }
 
-    public override double Scale { protected get; set; }
+    public override event EventHandler<double> NewScaleNotification;
 
     public override void Dispose()
     {
@@ -55,6 +55,15 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     {
       businessLogic.Start(numberOfBalls, BallCreatedHandler);
     }
+    public override void SetScale(double scale)
+    {
+      if (_scale != scale)
+      {
+        _scale = scale;
+        NewScaleNotification?.Invoke(this, scale);
+      }
+    }
+
 
     #endregion ModelAbstractApi
 
@@ -67,13 +76,15 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     private bool Disposed = false;
 
+    private double _scale = 1.0;
+
     private readonly Subject<IBall> ballCreatedSubject = new Subject<IBall>();
 
     private readonly BusinessLogicAbstractAPI businessLogic = null;
 
     private void BallCreatedHandler(BusinessLogic.IPosition position, BusinessLogic.IBall ball)
     {
-      ModelBall newBall = new ModelBall(position.x, position.y, ball) { Diameter = 20.0 };
+      ModelBall newBall = new ModelBall(position.x, position.y, 20.0, ball, this);
       ballCreatedSubject.OnNext(newBall);
     }
 

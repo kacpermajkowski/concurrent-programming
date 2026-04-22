@@ -9,6 +9,7 @@
 
 using System;
 using System.ComponentModel;
+using TP.ConcurrentProgramming.BusinessLogic;
 
 namespace TP.ConcurrentProgramming.Presentation.Model
 {
@@ -26,11 +27,13 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       return modelInstance.Value;
     }
 
+    public abstract event EventHandler<double> NewScaleNotification;
+
     public abstract void Start(int numberOfBalls);
 
     public abstract Dimensions Dimensions { get; }
 
-    public abstract double Scale { protected get; set; }
+    public abstract void SetScale(double scale);
 
     #region IObservable
 

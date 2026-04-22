@@ -7,6 +7,7 @@
 //  https://github.com/mpostol/TP/discussions/182
 //__________________________________________________________________________________________
 
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
@@ -94,11 +95,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
       set
       {
         _windowHeight = value;
-        double tempScale1 = WindowHeight / DEFAULT_HEIGHT;
-        double tempScale2 = value / DEFAULT_WIDTH;
-        if (tempScale2 < tempScale1) { 
-          _scale = tempScale2;
-        }
+        UpdateScale();
       }
     }
 
@@ -107,12 +104,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
       set
       {
         _windowWidth = value;
-        double tempScale1 = value / DEFAULT_HEIGHT;
-        double tempScale2 = WindowWidth / DEFAULT_WIDTH;
-        if (tempScale1 < tempScale2)
-        {
-          _scale = tempScale1;
-        }
+        UpdateScale();
       }
     }
 
@@ -170,6 +162,19 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
 
     private int _ballCount = 5;
     private string _ballCountText = "5";
+
+    private void UpdateScale()
+    {
+      double tempScale1 = WindowHeight / DEFAULT_HEIGHT;
+      double tempScale2 = WindowWidth / DEFAULT_WIDTH;
+      double tempScale = Math.Min(tempScale2, tempScale1);
+
+      if (tempScale != _scale)
+      {
+        _scale = tempScale;
+        ModelLayer.SetScale(_scale);
+      }
+    }
 
     private void ExecuteStart()
     {
