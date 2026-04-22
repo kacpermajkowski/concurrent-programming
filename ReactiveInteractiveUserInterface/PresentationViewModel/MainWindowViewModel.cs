@@ -100,6 +100,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
       {
         _windowHeight = value;
         ModelLayer.SetWindowDimensions(_windowHeight, _windowWidth);
+        RaisePropertyChanged(nameof(WindowHeight));
       }
     }
 
@@ -109,6 +110,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
       {
         _windowWidth = value;
         ModelLayer.SetWindowDimensions(_windowHeight, _windowWidth);
+        RaisePropertyChanged(nameof(WindowWidth));
       }
     }
 
@@ -177,17 +179,17 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
       RaisePropertyChanged(nameof(TableWidth));
     }
 
-    private const double DEFAULT_WINDOW_HEIGHT = 650;
-    private const double DEFAULT_WINDOW_WIDTH = 450;
-
-    private double _windowHeight = DEFAULT_WINDOW_HEIGHT;
-    private double _windowWidth = DEFAULT_WINDOW_WIDTH;
-
     private const double DEFAULT_TABLE_HEIGHT = 420;
     private const double DEFAULT_TABLE_WIDTH = 400;
 
     private double _tableHeight = DEFAULT_TABLE_HEIGHT;
     private double _tableWidth = DEFAULT_TABLE_WIDTH;
+
+    private const double DEFAULT_WINDOW_HEIGHT = DEFAULT_TABLE_HEIGHT + 46;
+    private const double DEFAULT_WINDOW_WIDTH = DEFAULT_TABLE_WIDTH + 8;
+
+    private double _windowHeight = DEFAULT_WINDOW_HEIGHT;
+    private double _windowWidth = DEFAULT_WINDOW_WIDTH;
 
     private bool Disposed = false;
 

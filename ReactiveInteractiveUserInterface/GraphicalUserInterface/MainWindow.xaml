@@ -28,7 +28,9 @@
             Visibility="{Binding SettingsVisibility, Converter={StaticResource BoolToVis}}"
             Command="{Binding StartCommand}"
             Content="Rozpocznij" Width="100" Margin="0,10,0,30"/>
-        <Border BorderThickness="4" BorderBrush="Green" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Border BorderThickness="4" BorderBrush="Green" HorizontalAlignment="Center" VerticalAlignment="Center"
+                Visibility="{Binding SettingsVisibility, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}"
+                >
             <ItemsControl ItemsSource="{Binding Balls}" Width="{Binding TableWidth}" Height="{Binding TableHeight}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
