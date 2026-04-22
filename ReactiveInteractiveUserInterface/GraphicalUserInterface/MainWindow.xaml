@@ -6,7 +6,10 @@
         xmlns:vm="clr-namespace:TP.ConcurrentProgramming.Presentation.ViewModel;assembly=TP.ConcurrentProgramming.PresentationViewModel"
         xmlns:v="clr-namespace:TP.ConcurrentProgramming.PresentationView"
         mc:Ignorable="d"
-        Title="Presentation layer targeting reactive behaviour" Height="688" Width="504">
+        Title="Presentation layer targeting reactive behaviour"
+        Width="{Binding WindowWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+        Height="{Binding WindowHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+        >
     <Window.Resources>
         <v:BoolToVisibilityConverter x:Key="BoolToVis"/>
     </Window.Resources>

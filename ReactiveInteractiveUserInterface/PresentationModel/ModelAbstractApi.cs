@@ -28,6 +28,10 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     public abstract void Start(int numberOfBalls);
 
+    public abstract Dimensions Dimensions { get; }
+
+    public abstract double Scale { protected get; set; }
+
     #region IObservable
 
     public abstract IDisposable Subscribe(IObserver<IBall> observer);
@@ -46,4 +50,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     #endregion private
   }
+
+  public record Dimensions(double TableHeight, double TableWidth);
 }

@@ -89,6 +89,35 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
       }
     }
 
+    public double WindowHeight {
+      get => _windowHeight;
+      set
+      {
+        _windowHeight = value;
+        double tempScale1 = WindowHeight / DEFAULT_HEIGHT;
+        double tempScale2 = value / DEFAULT_WIDTH;
+        if (tempScale2 < tempScale1) { 
+          _scale = tempScale2;
+        }
+      }
+    }
+
+    public double WindowWidth {
+      get => _windowWidth;
+      set
+      {
+        _windowWidth = value;
+        double tempScale1 = value / DEFAULT_HEIGHT;
+        double tempScale2 = WindowWidth / DEFAULT_WIDTH;
+        if (tempScale1 < tempScale2)
+        {
+          _scale = tempScale1;
+        }
+      }
+    }
+
+    public double Scale { get => _scale; }
+
     public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
 
     #endregion public API
@@ -123,6 +152,14 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     #endregion IDisposable
 
     #region private
+
+    private double _scale;
+
+    private const double DEFAULT_HEIGHT = 700;
+    private const double DEFAULT_WIDTH = 600;
+
+    private double _windowHeight = DEFAULT_HEIGHT;
+    private double _windowWidth = DEFAULT_WIDTH;
 
     private bool Disposed = false;
 

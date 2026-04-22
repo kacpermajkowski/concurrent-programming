@@ -31,6 +31,12 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     #region ModelAbstractApi
 
+    public override Dimensions Dimensions {
+      get => new Dimensions(businessLogic.Dimensions.TableHeight, businessLogic.Dimensions.TableWidth);
+    }
+
+    public override double Scale { protected get; set; }
+
     public override void Dispose()
     {
       if (Disposed)

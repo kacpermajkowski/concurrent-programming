@@ -69,6 +69,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       MoveTimer = new Timer(tickSimulation, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
     }
 
+    public override Dimensions Dimensions => new Dimensions(dataLayer.BoardHeight, dataLayer.BoardWidth);
+
     #endregion BusinessLogicAbstractAPI
 
     #region private
